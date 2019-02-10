@@ -1,19 +1,23 @@
 
 var letters = /^[a-zA-Z]+$/;
+var wordContainer = document.getElementById('wordToGuess');
+var getStartedContainer = document.getElementById('getStarted');
+var wrongGuessesContainer = document.getElementById('wrongGuesses');
+var livesContainer = document.getElementById('lives');
+var livesIcons = document.getElementById('livesIcons');
+var scoreBoardContainer = document.getElementById('scoreBoard');
+var winsContainer = document.getElementById('wins');
+var lossesContainer = document.getElementById('losses');
 
 var game = {
   wins: 0,
   losses: 0,
   gameStarted: false,
-  currentIndex: 0,
   currentWordArray: [],
-  lives: 10,
+  lives: 4,
   lettersContainer: null,
-  wordContainer: document.getElementById('wordToGuess'),
-  getStartedContainer: document.getElementById('getStarted'),
-  wrongGuessesContainer: document.getElementById('wrongGuesses'),
   incorrectLetters: [],
-  characters: [
+  words: [
     {
       name: "Spider-Man",
       played: false
@@ -50,39 +54,58 @@ var game = {
 
   startNewGame: function() {
     // hide get started div
-    this.getStartedContainer.classList.add('hidden');
-    this.wordContainer.classList.remove('hidden');
-    this.gameStarted = true;
+    getStartedContainer.classList.add('hidden');
+    wordContainer.classList.remove('hidden');
+    wrongGuessesContainer.classList.remove('hidden');
+    livesContainer.classList.remove('hidden');
+    scoreBoardContainer.classList.remove('hidden');
 
+    this.gameStarted = true;
+    this.lives = 4;
     this.setUpWordInfo();
+    this.updateLivesRemaining();
+    this.updateScoreBoard();
   },
  
   getRandomIndex: function() {
-    // if all character's haven't been played. maybe move this out a level???
-    if (this.characters.every(x => x.played !== true)) {
 
-      // keep on looking for a random character that hasn't been played yet
+    // if there are any available words to play, return a random index
+    if (!this.words.every(x => x.played === true)) {
       var rInd = null;
+      var ind
       
       do {
-        var ind = Math.floor(Math.random() * this.characters.length)
-        if (!this.characters[ind].played) { rInd = ind; }
+        ind = Math.floor(Math.random() * this.words.length)
+        if (!this.words[ind].played) { rInd = ind; }
       } while (rInd === null)
-
+      
       return ind;
 
     } else {
-      // prompt start over somewhere...
-      console.log('all played!')
+      // reset it if there are no more available words
+      this.resetWords();
     }
   
   },
 
+  resetWords: function() {
+    this.words.forEach(function(val) {
+      val.played = false;
+    });
+    this.setUpWordInfo();
+  },
+
   setUpWordInfo: function() {
-    // flush current word array
+    // flush current word and guessed letters arrays
     this.currentWordArray = [];
-    this.currentIndex = this.getRandomIndex();
-    var wordArray = this.characters[this.currentIndex].name.split('');
+    this.incorrectLetters = [];
+    this.renderWrongLetters();
+
+    var currentIndex = this.getRandomIndex();
+    console.log(currentIndex);
+
+    this.words[currentIndex].played = true;
+    var wordArray = this.words[currentIndex].name.split('');
 
     wordArray.forEach(function(char, i) {
       var special = (!char.match(letters)) ? true : false;
@@ -94,8 +117,8 @@ var game = {
 
   renderWord: function() {
     // flush the current div
-    while(this.wordContainer.firstChild) {
-      this.wordContainer.removeChild(this.wordContainer.firstChild);
+    while(wordContainer.firstChild) {
+      wordContainer.removeChild(wordContainer.firstChild);
     }
 
     this.currentWordArray.forEach(function(char, i) {
@@ -113,53 +136,110 @@ var game = {
         letterSpan.innerText = char.letter;
       }
 
-      this.wordContainer.append(letterSpan);
+      wordContainer.append(letterSpan);
     
     }.bind(this))
   },
 
   checkLetter: function(l) {
-    var somethingRight = false;
+    // look for the letter in the current word array
+    // set that object's anwswered property to true if it's found
+    var letterRight = false;
+    var alreadyGuessedCorrect = false;
     this.currentWordArray.forEach(function(val) {
       if (val.letter.toLowerCase() === l) {
-        somethingRight = true;
+        letterRight = true;
+        alreadyGuessedCorrect = (!val.answered) ? false : true;
         val.answered = true;
       }
     });
+    // if there were right letters found, re-render the word
+    if (letterRight === true) {
+      // prevent already correct guessed letters from scoring
+      if (alreadyGuessedCorrect === false) {
+        this.renderWord();
+        this.handleScoring(true);
+      }
+    } else {
+      // if this letter hasn't already been guessed
+      if (this.incorrectLetters.indexOf(l) === -1) {
+        this.incorrectLetters.push(l);
+        this.renderWrongLetters();
+        this.handleScoring(false);
+      }      
+    }
+    
+  },
 
-    if (somethingRight === true) {
-      this.renderWord();
+  handleScoring: function(correct) {
+    if (correct) {
       if (this.currentWordArray.every(w => w.answered === true)) {
+        this.wins = this.wins += 1;
         this.completedWordResponse();
       }
     } else {
-      this.incorrectLetters.push(l);
-      this.renderWrongLetters();
-    }    
+      this.lives = this.lives -= 1;
+      this.updateLivesRemaining();
+      
+      if (this.lives === 0) { 
+        this.losses = this.losses += 1;
+        this.failedWordResponse();
+      }
+    }
+    
+    this.updateScoreBoard();
   },
 
   renderWrongLetters: function() {
     // flush the current div
-    while(this.wrongGuessesContainer.firstChild) {
-      this.wrongGuessesContainer.removeChild(this.wrongGuessesContainer.firstChild);
+    while(wrongGuessesContainer.firstChild) {
+      wrongGuessesContainer.removeChild(wrongGuessesContainer.firstChild);
     }
 
     this.incorrectLetters.forEach(function(l) {
-      this.wrongGuessesContainer.append(l);
-    }.bind(this));
+      wrongGuessesContainer.append(l);
+    });
+  },
+
+  updateLivesRemaining: function() {
+    while(livesIcons.firstChild) {
+      livesIcons.removeChild(livesIcons.firstChild);
+    }
+    
+    for (i = 0; i < this.lives; i++) {
+      livesIcons.append('*');
+    }  
+  },
+
+  updateScoreBoard: function() {
+    winsContainer.innerText = this.wins;
+    lossesContainer.innerText = this.losses;
   },
 
   completedWordResponse: function() {
+    // play correct word sound
+
+    // show captain america
+
     setTimeout(function() {
-      this.setUpWordInfo()
+      this.setUpWordInfo();
+      this.lives = 4; // reset
+      this.updateLivesRemaining();
     }.bind(this), 1500);
   },
 
-  completedGameResponse: function() {
-
-  },
-
-  failedGame: function() {
+  failedWordResponse: function() {
+    
+    // play failed game sound
+    console.log('fail!');
+    
+    // show thanos
+    
+    setTimeout(function() {
+      this.setUpWordInfo();
+      this.lives = 4; // reset
+      this.updateLivesRemaining();
+    }.bind(this), 1500);
 
   }
 
