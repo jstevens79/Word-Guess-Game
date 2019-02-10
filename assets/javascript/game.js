@@ -1,13 +1,18 @@
 
+var letters = /^[a-zA-Z]+$/;
+
 var game = {
   wins: 0,
   losses: 0,
+  gameStarted: false,
   currentIndex: 0,
   currentWordArray: [],
-  currentTries: 0,
+  lives: 10,
   lettersContainer: null,
   wordContainer: document.getElementById('wordToGuess'),
-  guessedLetters: [],
+  getStartedContainer: document.getElementById('getStarted'),
+  wrongGuessesContainer: document.getElementById('wrongGuesses'),
+  incorrectLetters: [],
   characters: [
     {
       name: "Spider-Man",
@@ -22,10 +27,6 @@ var game = {
       played: false
     },
     {
-      name: "Black Panther",
-      played: false
-    },
-    {
       name: "Vibranium",
       played: false
     },
@@ -36,8 +37,25 @@ var game = {
     {
       name: "Wakanda",
       played: false
+    },
+    {
+      name: "Iron Man",
+      played: false
+    },
+    {
+      name: "Star-Lord",
+      played: false
     }
   ],
+
+  startNewGame: function() {
+    // hide get started div
+    this.getStartedContainer.classList.add('hidden');
+    this.wordContainer.classList.remove('hidden');
+    this.gameStarted = true;
+
+    this.setUpWordInfo();
+  },
  
   getRandomIndex: function() {
     // if all character's haven't been played. maybe move this out a level???
@@ -55,18 +73,20 @@ var game = {
 
     } else {
       // prompt start over somewhere...
+      console.log('all played!')
     }
   
   },
 
   setUpWordInfo: function() {
+    // flush current word array
+    this.currentWordArray = [];
     this.currentIndex = this.getRandomIndex();
-
     var wordArray = this.characters[this.currentIndex].name.split('');
 
     wordArray.forEach(function(char, i) {
       var special = (!char.match(letters)) ? true : false;
-      this.currentWordArray.push({ letter: char, answered: false, nonAlpha: special })
+      this.currentWordArray.push({ letter: char, answered: special, nonAlpha: special })
     }.bind(this))
 
     this.renderWord();   
@@ -105,41 +125,73 @@ var game = {
         somethingRight = true;
         val.answered = true;
       }
-    })
+    });
 
     if (somethingRight === true) {
       this.renderWord();
       if (this.currentWordArray.every(w => w.answered === true)) {
-        console.log('ready for next');
+        this.completedWordResponse();
       }
     } else {
-      // return an incorrect message
-      // save incorrect letters?
+      this.incorrectLetters.push(l);
+      this.renderWrongLetters();
     }    
+  },
+
+  renderWrongLetters: function() {
+    // flush the current div
+    while(this.wrongGuessesContainer.firstChild) {
+      this.wrongGuessesContainer.removeChild(this.wrongGuessesContainer.firstChild);
+    }
+
+    this.incorrectLetters.forEach(function(l) {
+      this.wrongGuessesContainer.append(l);
+    }.bind(this));
+  },
+
+  completedWordResponse: function() {
+    setTimeout(function() {
+      this.setUpWordInfo()
+    }.bind(this), 1500);
+  },
+
+  completedGameResponse: function() {
 
   },
 
-  startNewGame: function() {
-    this.setUpWordInfo()
+  failedGame: function() {
+
   }
+
 
 }
 
-var letters = /^[a-zA-Z]+$/;
+
 
 // listen for user input
 document.addEventListener('keyup', function(e) {
-  var theKey = e.key.toLowerCase()
+
+  if (!game.gameStarted) {
+
+    game.startNewGame();
+
+    // start the game
+  } else {
+    var theKey = e.key.toLowerCase()
   
-  if (theKey.match(letters)) {
-    game.checkLetter(theKey);
+    if (theKey.match(letters)) {
+      game.checkLetter(theKey);
+    }
+
   }
+
+ 
     
 })
   
 
 // get the party started
-game.startNewGame()
+
 
 
 // NOTES: split array out for current word and save into object value first. will be WAY cleaner.
