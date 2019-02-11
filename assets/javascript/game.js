@@ -9,6 +9,7 @@ var livesIcons = document.getElementById('livesIcons');
 var scoreBoardContainer = document.getElementById('scoreArea');
 var winsContainer = document.getElementById('wins');
 var lossesContainer = document.getElementById('losses');
+var responseImageCard = document.getElementById('responseImageCard');
 
 // audio
 var gameStartAudio = document.getElementById('gameStartAudio');
@@ -253,12 +254,14 @@ var game = {
     winAudio.play();
 
     // show captain america
+    responseImageCard.classList.add('correct');
 
     setTimeout(function() {
       this.setUpWordInfo();
       this.lives = 5; // reset
       this.updateLivesRemaining();
-    }.bind(this), 1500);
+      responseImageCard.classList.remove('correct');
+    }.bind(this), 1800);
   },
 
   failedWordResponse: function() {
@@ -267,12 +270,14 @@ var game = {
     loseAudio.play();
 
     // show thanos
+    responseImageCard.classList.add('incorrect');
     
     setTimeout(function() {
       this.setUpWordInfo();
       this.lives = 5; // reset
       this.updateLivesRemaining();
-    }.bind(this), 1500);
+      responseImageCard.classList.remove('incorrect');
+    }.bind(this), 1800);
 
   }
 

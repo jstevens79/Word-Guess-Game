@@ -70,7 +70,6 @@ body {
   color: white;
   text-align: center;
   background-color: rgba(50,57,153,0.98);
-  box-shadow: 3px 3px 10px rgba(0,0,0,0.6);
   position: relative;
   padding-bottom: 20px;
 }
@@ -117,7 +116,6 @@ body {
   padding: 10px 20px;
   min-height: 22px;
 }
-
 
 .letterSpace {
   font-size: 32px;
@@ -208,14 +206,80 @@ p {
   display: none !important;
 }
 
-.capsShield {
-  display: block;
-  width: 50%;
+#responseImageContainer {
+  position: relative;
+  padding-top: 40px;
+=  width: 50%;
   max-width: 300px;
-  height: auto;
-  margin: 40px auto;
+  height: 300px;
+  margin: 0 auto;
+  perspective: 1000px;
 }
+
+#responseImageCard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.25s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.front, .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+.front img, .back img {
+  width: 100%;
+  height: 100%;
+}
+
+.back {
+  transform: rotateY(180deg);
+  background: black;
+}
+
+.winCard, .loseCard {
+  opacity: 0;
+  transition: opacity .25s ease;
+  position: relative;
+}
+
+.responseText {
+  position: absolute;
+  bottom: 20%;
+  color: white;
+  background: rgba(0,0,0,0.6);
+  padding: 10px 6px;
+  border-radius: 8px;
+  left: 50%;
+  transform: translate(-50%);
+  font-size: 20px;
+  text-align: center;
+  line-height: 1.2em;
+}
+
 
 #livesIcons i {
   margin-right: 10px;
+}
+
+#responseImageContainer #responseImageCard.correct {
+  transform: rotateY(180deg);
+}
+
+#responseImageContainer #responseImageCard.correct .winCard {
+  opacity: 1;
+}
+
+#responseImageContainer #responseImageCard.incorrect .loseCard {
+  opacity: 1;
+}
+
+#responseImageContainer #responseImageCard.incorrect {
+  transform: rotateY(-180deg);
 }
