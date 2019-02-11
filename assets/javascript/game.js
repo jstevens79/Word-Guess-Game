@@ -3,18 +3,24 @@ var letters = /^[a-zA-Z]+$/;
 var wordContainer = document.getElementById('wordToGuess');
 var getStartedContainer = document.getElementById('getStarted');
 var wrongGuessesContainer = document.getElementById('wrongGuesses');
+var wrongLettersContainer = document.getElementById('wrongLetters');
 var livesContainer = document.getElementById('lives');
 var livesIcons = document.getElementById('livesIcons');
-var scoreBoardContainer = document.getElementById('scoreBoard');
+var scoreBoardContainer = document.getElementById('scoreArea');
 var winsContainer = document.getElementById('wins');
 var lossesContainer = document.getElementById('losses');
+
+// audio
+var gameStartAudio = document.getElementById('gameStartAudio');
+var winAudio = document.getElementById('winAudio');
+var loseAudio = document.getElementById('loseAudio');
 
 var game = {
   wins: 0,
   losses: 0,
   gameStarted: false,
   currentWordArray: [],
-  lives: 4,
+  lives: 5,
   lettersContainer: null,
   incorrectLetters: [],
   words: [
@@ -49,10 +55,34 @@ var game = {
     {
       name: "Star-Lord",
       played: false
+    },
+    {
+      name: "Groot",
+      played: false
+    },
+    {
+      name: "Black Widow",
+      played: false
+    },
+    {
+      name: "Infinity Stone",
+      played: false
+    },
+    {
+      name: "Thanos",
+      played: false
+    },
+    {
+      name: "Dr Strange",
+      played: false
     }
   ],
 
   startNewGame: function() {
+
+    gameStartAudio.play();
+    gameStartAudio.volume = 0.6;
+
     // hide get started div
     getStartedContainer.classList.add('hidden');
     wordContainer.classList.remove('hidden');
@@ -61,7 +91,7 @@ var game = {
     scoreBoardContainer.classList.remove('hidden');
 
     this.gameStarted = true;
-    this.lives = 4;
+    this.lives = 5;
     this.setUpWordInfo();
     this.updateLivesRemaining();
     this.updateScoreBoard();
@@ -102,7 +132,6 @@ var game = {
     this.renderWrongLetters();
 
     var currentIndex = this.getRandomIndex();
-    console.log(currentIndex);
 
     this.words[currentIndex].played = true;
     var wordArray = this.words[currentIndex].name.split('');
@@ -192,12 +221,12 @@ var game = {
 
   renderWrongLetters: function() {
     // flush the current div
-    while(wrongGuessesContainer.firstChild) {
-      wrongGuessesContainer.removeChild(wrongGuessesContainer.firstChild);
+    while(wrongLettersContainer.firstChild) {
+      wrongLettersContainer.removeChild(wrongLettersContainer.firstChild);
     }
 
     this.incorrectLetters.forEach(function(l) {
-      wrongGuessesContainer.append(l);
+      wrongLettersContainer.append(l);
     });
   },
 
@@ -207,7 +236,10 @@ var game = {
     }
     
     for (i = 0; i < this.lives; i++) {
-      livesIcons.append('*');
+      var star = document.createElement('i');
+      //star.classList.add('fas');
+      star.setAttribute('class', 'fas fa-star')
+      livesIcons.append(star);
     }  
   },
 
@@ -218,12 +250,13 @@ var game = {
 
   completedWordResponse: function() {
     // play correct word sound
+    winAudio.play();
 
     // show captain america
 
     setTimeout(function() {
       this.setUpWordInfo();
-      this.lives = 4; // reset
+      this.lives = 5; // reset
       this.updateLivesRemaining();
     }.bind(this), 1500);
   },
@@ -231,47 +264,34 @@ var game = {
   failedWordResponse: function() {
     
     // play failed game sound
-    console.log('fail!');
-    
+    loseAudio.play();
+
     // show thanos
     
     setTimeout(function() {
       this.setUpWordInfo();
-      this.lives = 4; // reset
+      this.lives = 5; // reset
       this.updateLivesRemaining();
     }.bind(this), 1500);
 
   }
 
-
 }
-
 
 
 // listen for user input
 document.addEventListener('keyup', function(e) {
 
   if (!game.gameStarted) {
-
     game.startNewGame();
-
-    // start the game
   } else {
     var theKey = e.key.toLowerCase()
   
-    if (theKey.match(letters)) {
+    if (theKey.match(letters) && theKey.length === 1) {
       game.checkLetter(theKey);
     }
 
   }
 
- 
-    
 })
   
-
-// get the party started
-
-
-
-// NOTES: split array out for current word and save into object value first. will be WAY cleaner.
