@@ -1,4 +1,4 @@
-# An Avenger's Bases Word Guessing Game for Vandy Class.
+# An Avenger's-Themed Word Guessing Game for Vandy Class.
 A word guessing game. Guess Avengers-related words before you run out of lives.
 
 ## Technologies
