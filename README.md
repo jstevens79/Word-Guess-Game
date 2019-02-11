@@ -1,2 +1,5 @@
-# Word-Guess-Game
-A word guessing game. 
+# An Avenger's Bases Word Guessing Game for Vandy Class.
+A word guessing game. Guess Avengers-related words before you run out of lives.
+
+## Technologies
+Built with HTML, CSS, and JavaScript
