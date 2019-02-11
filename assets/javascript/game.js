@@ -21,7 +21,7 @@ var game = {
   losses: 0,
   gameStarted: false,
   currentWordArray: [],
-  lives: 5,
+  lives: 4,
   lettersContainer: null,
   incorrectLetters: [],
   words: [
@@ -92,9 +92,8 @@ var game = {
     scoreBoardContainer.classList.remove('hidden');
 
     this.gameStarted = true;
-    this.lives = 5;
     this.setUpWordInfo();
-    this.updateLivesRemaining();
+    this.updateLivesRemaining(4);
     this.updateScoreBoard();
   },
  
@@ -231,7 +230,11 @@ var game = {
     });
   },
 
-  updateLivesRemaining: function() {
+  updateLivesRemaining: function(num) {
+    if (num !== undefined) {
+      this.lives = num;
+    }
+
     while(livesIcons.firstChild) {
       livesIcons.removeChild(livesIcons.firstChild);
     }
@@ -258,8 +261,7 @@ var game = {
 
     setTimeout(function() {
       this.setUpWordInfo();
-      this.lives = 5; // reset
-      this.updateLivesRemaining();
+      this.updateLivesRemaining(4);
       responseImageCard.classList.remove('correct');
     }.bind(this), 1800);
   },
@@ -274,8 +276,7 @@ var game = {
     
     setTimeout(function() {
       this.setUpWordInfo();
-      this.lives = 5; // reset
-      this.updateLivesRemaining();
+      this.updateLivesRemaining(4);
       responseImageCard.classList.remove('incorrect');
     }.bind(this), 1800);
 
